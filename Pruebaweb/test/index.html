@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js"></script>
+    <script type="module" src="./buscar_proveedores.js"></script>
+    <title>Document</title>
+</head>
+
+<body>
+    <header>
+        <a class="logo" href="index.html">
+            <img src="SercotecLogo.png" class="logo-img">
+        </a>
+    </header>
+    <nav id="second-nav">
+        <ul>
+            <li><a href="https://www.sercotec.cl/centros-de-negocios/nosotros/">Quienes somos</a></li>
+            <li><a href="https://www.sercotec.cl/barrios-comerciales/">Barrios comerciales</a></li>
+            <li><a href="https://www.sercotec.cl/centros-de-negocios/nuestros-servicios/">servicios</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <div class="search-container">
+            <div class="inputbox">
+                <input type="text" id="busqueda" placeholder="Buscar por nombre o categoría">
+                <button type="button" id="buscar">Buscar</button>
+            </div>
+        </div>
+
+        <div class="data-container">
+            <div id="datosContainer" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js";
+        import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-database.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCAc754Bh1IFzP0qfjjEAyx9OxWDKeav-Q",
+            authDomain: "nosequeponer2-126ef.firebaseapp.com",
+            projectId: "nosequeponer2-126ef",
+            storageBucket: "nosequeponer2-126ef.appspot.com",
+            messagingSenderId: "1000021531673",
+            appId: "1:1000021531673:web:1ed225e62f76efa0031e88",
+            measurementId: "G-B2WPVRMM23"
+        };
+
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+
+        //get ref to database services
+        const db = getDatabase(app);
+
+        function buscarNegocios(query) {
+            const negociosRef = ref(db, 'negocio/');
+            get(negociosRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const datosContainer = document.getElementById("datosContainer");
+                    datosContainer.innerHTML = "";  // Limpiar el contenido previo
+
+                    snapshot.forEach((childSnapshot) => {
+                        const negocioData = childSnapshot.val();
+
+                        // Filtrar por nombre o categoría
+                        if (negocioData.nombre.toLowerCase().includes(query) || negocioData.categoria.toLowerCase().includes(query)) {
+                            const negocioElement = document.createElement('div');
+                            negocioElement.className = 'negocio-item';
+
+                            const imagenContainer = document.createElement('div');
+                            imagenContainer.className = 'imagen-container'
+                            imagenContainer.innerHTML = `<img src="${negocioData.imagenURL}" alt="imagen del negocio">`;
+
+                            const valoresContainer = document.createElement('div');
+                            valoresContainer.className = 'valores-container';
+                            valoresContainer.innerHTML = `
+                                <p>Nombre: ${negocioData.nombre}</p>
+                                <p>Categoría: ${negocioData.categoria}</p>
+                                <p>Descripción: ${negocioData.descripcion}</p>
+                                <p>Página Web: <a href="${negocioData.paginaweb}" target="_blank">${negocioData.paginaweb}</a></p>
+                                <p>Número de Contacto: ${negocioData.contacto || 'No disponible'}</p>
+                                <hr>
+                            `;
+
+                            datosContainer.appendChild(negocioElement);
+                            negocioElement.appendChild(imagenContainer);
+                            negocioElement.appendChild(valoresContainer);
+                        }
+                    });
+
+                    datosContainer.style.display = 'block';  // Mostrar el contenedor
+                } else {
+                    console.log("No hay datos almacenados.");
+                }
+            }).catch((error) => {
+                console.error("Error al obtener datos:", error);
+            });
+        }
+
+        document.getElementById("buscar").addEventListener('click', function () {
+            const query = document.getElementById("busqueda").value.toLowerCase();
+            buscarNegocios(query);
+        });
+    </script>
+
+    <footer id="mi-footer">
+
+        <div id="redes-sociales">
+            <a href="https://www.facebook.com/Sercotec/" class="social-icon"><i class="fa fa-facebook"></i></a>
+            <a href="https://twitter.com/Sercotec_Chile" class="social-icon"><i class="fa fa-twitter"></i></a>
+            <a href="https://www.youtube.com/user/CanalSERCOTEC" class="social-icon"><i
+                    class="fa fa-youtube-play"></i></a>
+        </div>
+
+        <div id="logo-container">
+            <a class="logo" href="https://www.sercotec.cl/centros-de-negocios/nosotros/">
+                <img src="C_neg_secrotec.png" class="logo-img">
+            </a>
+        </div>
+    </footer>
+
+
+</body>
+
+</html>
